@@ -3,12 +3,28 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOSH-X-BOT</title>
+    <title>TOSH-X-BOT | Live</title>
     <style>
-      body { background-color: #0a0a0a; color: #d4af37; font-family: sans-serif; }
+      body { background-color: #0a0a0a; color: #d4af37; font-family: sans-serif; padding: 20px; }
+      #data-log { border: 1px solid #d4af37; padding: 10px; margin-top: 20px; height: 200px; overflow-y: scroll; color: #fff; }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <h1>TOSH-X-BOT: Live Data</h1>
+    <div id="data-log">Connecting to market...</div>
+
+    <script type="module">
+      // Import the class we just created
+      import { DerivConnection } from './src/deriv.ts';
+
+      const logDiv = document.getElementById('data-log');
+      
+      const bot = new DerivConnection((tick) => {
+        // This runs every time a new price comes in
+        const entry = document.createElement('div');
+        entry.textContent = `New Tick: ${tick.quote} at ${new Date().toLocaleTimeString()}`;
+        logDiv.prepend(entry);
+      });
+    </script>
   </body>
 </html>
