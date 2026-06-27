@@ -2,29 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOSH-X-BOT | Live</title>
     <style>
       body { background-color: #0a0a0a; color: #d4af37; font-family: sans-serif; padding: 20px; }
-      #data-log { border: 1px solid #d4af37; padding: 10px; margin-top: 20px; height: 200px; overflow-y: scroll; color: #fff; }
+      #data-log { border: 1px solid #d4af37; padding: 10px; margin-top: 20px; height: 300px; overflow-y: scroll; color: #fff; font-family: monospace; }
     </style>
   </head>
   <body>
     <h1>TOSH-X-BOT: Live Data</h1>
-    <div id="data-log">Connecting to market...</div>
+    <div id="data-log">Connecting to WebSocket...</div>
 
-    <script type="module">
-      // Import the class we just created
-      import { DerivConnection } from './src/deriv.ts';
-
+    <script>
+      // We are putting the logic here directly to ensure it loads
+      const socket = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
       const logDiv = document.getElementById('data-log');
-      
-      const bot = new DerivConnection((tick) => {
-        // This runs every time a new price comes in
-        const entry = document.createElement('div');
-        entry.textContent = `New Tick: ${tick.quote} at ${new Date().toLocaleTimeString()}`;
-        logDiv.prepend(entry);
-      });
+
+      socket.onopen = () => {
+        logDiv.innerHTML = "Connected! Waiting for market ticks...";
+        // Subscribe to R_100 (Volatility 100 Index)
+        socket.send(JSON.stringify({ ticks: "R_100" }));
+      };
+
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.tick) {
+          const entry = document.createElement('div');
+          entry.textContent = `[${new Date().toLocaleTimeString()}] Price: ${data.tick.quote}`;
+          logDiv.prepend(entry);
+        }
+      };
     </script>
   </body>
 </html>
