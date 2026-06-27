@@ -1,40 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOSH-X-BOT | Live</title>
+    <title>TOSH-X-BOT | Premium Terminal</title>
     <style>
-      body { background-color: #0a0a0a; color: #d4af37; font-family: sans-serif; padding: 20px; }
-      #data-log { border: 1px solid #d4af37; padding: 10px; margin-top: 20px; height: 300px; overflow-y: scroll; color: #fff; font-family: monospace; }
+        body { background: #0a0a0a; color: #d4af37; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        header { display: flex; justify-content: space-between; padding: 20px; border-bottom: 1px solid #d4af37; }
+        .auth-controls button { background: #d4af37; color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+        .bot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 40px; }
+        .card { border: 1px solid #d4af37; padding: 20px; text-align: center; background: #111; }
     </style>
-  </head>
-  <body>
-    <h1>TOSH-X-BOT: Live Data</h1>
-    <div id="data-log">Connecting to WebSocket...</div>
+</head>
+<body>
 
-    <script>
-      const logDiv = document.getElementById('data-log');
-      const socket = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+<header>
+    <div class="logo">TOSH-X-BOT</div>
+    <div class="auth-controls" id="auth-area">
+        <button id="login-btn">Login</button>
+        <a href="https://partner-tracking.deriv.com/click?a=31609&o=1&c=3&link_id=1" style="color:#d4af37; margin-left:15px;">Sign Up</a>
+    </div>
+</header>
 
-      socket.onopen = () => {
-        logDiv.innerHTML = "Connected! Waiting for market ticks...";
-        // Subscribe to Volatility 100 Index
-        socket.send(JSON.stringify({ ticks: "R_100" }));
-      };
+<div class="bot-grid" id="bot-container">
+    </div>
 
-      socket.onmessage = (event) => {
-        const response = JSON.parse(event.data);
-        if (response.tick) {
-          const entry = document.createElement('div');
-          entry.textContent = `[${new Date().toLocaleTimeString()}] Price: ${response.tick.quote}`;
-          logDiv.prepend(entry);
-        }
-      };
+<script>
+    const APP_ID = '1089';
+    const REDIRECT_URL = window.location.origin + window.location.pathname;
 
-      socket.onerror = (error) => {
-        logDiv.innerHTML = "Error connecting to WebSocket.";
-      };
-    </script>
-  </body>
+    // Login Redirect
+    document.getElementById('login-btn').onclick = () => {
+        window.location.href = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URL)}`;
+    };
+
+    // Check for token on return
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token1');
+    if (token) {
+        localStorage.setItem('tosh_token', token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showDashboard();
+    }
+
+    function showDashboard() {
+        document.getElementById('auth-area').innerHTML = `<select><option>Real</option><option>Demo</option></select>`;
+        document.getElementById('bot-container').innerHTML = "<h1>Welcome, Trader. Select a Bot to Start.</h1>";
+    }
+</script>
+</body>
 </html>
