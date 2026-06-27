@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOSH-X-BOT | Live</title>
     <style>
       body { background-color: #0a0a0a; color: #d4af37; font-family: sans-serif; padding: 20px; }
@@ -13,23 +14,26 @@
     <div id="data-log">Connecting to WebSocket...</div>
 
     <script>
-      // We are putting the logic here directly to ensure it loads
-      const socket = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
       const logDiv = document.getElementById('data-log');
+      const socket = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
 
       socket.onopen = () => {
         logDiv.innerHTML = "Connected! Waiting for market ticks...";
-        // Subscribe to R_100 (Volatility 100 Index)
+        // Subscribe to Volatility 100 Index
         socket.send(JSON.stringify({ ticks: "R_100" }));
       };
 
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.tick) {
+        const response = JSON.parse(event.data);
+        if (response.tick) {
           const entry = document.createElement('div');
-          entry.textContent = `[${new Date().toLocaleTimeString()}] Price: ${data.tick.quote}`;
+          entry.textContent = `[${new Date().toLocaleTimeString()}] Price: ${response.tick.quote}`;
           logDiv.prepend(entry);
         }
+      };
+
+      socket.onerror = (error) => {
+        logDiv.innerHTML = "Error connecting to WebSocket.";
       };
     </script>
   </body>
